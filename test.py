@@ -3,6 +3,7 @@ from models import Model
 import theano
 import theano.tensor as T
 import numpy
+from theano.gpuarray import dnn
 
 EPS = 1e-6
 
@@ -32,25 +33,32 @@ def test_gru(depth, input_dim, hidden_dim):
 
 	model.print_params()
 
-	list_of_param_values = [p.get_value() for p in params] #list of param values
+	#list_of_param_values = [p.get_value() for p in params] #list of param values
 
-	output = last_layer.output() # output tensor
+	#output = last_layer.output() # output tensor
 
-	forward_fun = theano.function([X, h0], output) #forward function
+	#forward_fun = theano.function([X, h0], output) #forward function
 
 
-	Y = T.tensor3('Y') # proxy tensor with which we want to match the output of rnn to get a loss
+	#Y = T.tensor3('Y') # proxy tensor with which we want to match the output of rnn to get a loss
 
 
 	'''For checking gradient, I am defining loss as following,
 	 here 'output' is the theano tensor representing output of rnn op'''
 
-	loss = T.mean((Y - output)*(Y - output)) # mean square error
+	#loss = T.mean((Y - output)*(Y - output)) # mean square error
 
-	grad = T.grad(loss, params) # list of gradient with respect to parameters
+	#grad = T.grad(loss, params) # list of gradient with respect to parameters
 
-	get_grad = theano.function([X, h0, Y], grad) # getting list of gradients
+	#get_grad = theano.function([X, h0, Y], grad) # getting list of gradients
+        rnnb = dnn.RNNBlock('float32', hidden_dim, depth, 'gru')
+        psize = rnnb.get_param_size([2, input_dim])
+        params = theano.shared(numpy.zeros((psize,), dtype='float32'))
+        # irm, irb, ium, iub, inm, inb, rrm, rrb, rum, rub, rnm, rnb
+        l0params = rnnb.split_params(params, 0, [2, input_dim])
+        print [p.shape for p in l0params]
 
+        import sys;sys.exit(0)
 	'''
 	loss_rnn = T.mean((Y-output_cudnn)*(Y - output_cudnn))
 	grad_cudnn = T.grad(loss, params_cudnn)
