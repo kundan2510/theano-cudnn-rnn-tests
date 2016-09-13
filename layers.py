@@ -1,12 +1,10 @@
+from __future__ import absolute_import, print_function
+
 import theano
 import theano.tensor as T
 import numpy
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
-from theano.sandbox.cuda.dnn import dnn_conv
-
-import sys
-sys.setrecursionlimit(50000)
-
+from theano.gpuarray.dnn import dnn_conv
 
 from generic_utils import *
 srng = RandomStreams(seed=3732)

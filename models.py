@@ -1,3 +1,5 @@
+from __future__ import absolute_import, print_function
+
 import pickle
 import numpy
 
@@ -19,7 +21,7 @@ class Model:
 
 	def print_layers(self):
 		for layer in self.layers:
-			print layer.name
+			print(layer.name)
 
 	def get_params(self):
 		return self.params
@@ -29,9 +31,9 @@ class Model:
 		for p in self.params:
 			curr_params = numpy.prod(numpy.shape(p.get_value()))
 			total_params += curr_params
-			print "{} ({})".format(p.name, curr_params)
-		print ("total number of parameters: {}".format(total_params))
-		print ("Note: Effective number of parameters might be less due if you are using masking!!")
+			print("{} ({})".format(p.name, curr_params))
+		print("total number of parameters: {}".format(total_params))
+		print("Note: Effective number of parameters might be less due if you are using masking!!")
 
 	def combine_with(self, model, new_name):
 		'''
