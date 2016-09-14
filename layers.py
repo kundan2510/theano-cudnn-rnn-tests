@@ -80,32 +80,37 @@ class GRU(Layer):
 		'''Layers weights'''
 
 		'''self.params is passed so that any paramters could be appended to it'''
+		self.W_r = linear_transform_weights(input_dim, output_dim, param_list=self.params, name=name+".W_r", w_normalization=False)
+		self.b_wr = bias_weights((output_dim, ), param_list=self.params, name=name+".b_wr")
 
 		self.W_i = linear_transform_weights(input_dim, output_dim, param_list=self.params, name=name+".W_i", w_normalization=False)
-		self.W_r = linear_transform_weights(input_dim, output_dim, param_list=self.params, name=name+".W_r", w_normalization=False)
-		self.W_h = linear_transform_weights(input_dim, output_dim, param_list=self.params, name=name+".W_h", w_normalization=False)
-		self.R_i = linear_transform_weights(output_dim, output_dim, param_list=self.params, name=name+".R_i", w_normalization=False)
-		self.R_r = linear_transform_weights(output_dim, output_dim, param_list=self.params, name=name+".R_r", w_normalization=False)
-		self.R_h = linear_transform_weights(output_dim, output_dim, param_list=self.params, name=name+".R_h", w_normalization=False)
-		self.b_rh = bias_weights((output_dim, ), param_list=self.params, name=name+".b_rh")
-		self.b_rr = bias_weights((output_dim, ), param_list=self.params, name=name+".b_rr")
-		self.b_ru = bias_weights((output_dim, ), param_list=self.params, name=name+".b_ru")
 		self.b_wi = bias_weights((output_dim, ), param_list=self.params, name=name+".b_wi")
-		self.b_wr = bias_weights((output_dim, ), param_list=self.params, name=name+".b_wr")
+
+		
+		self.W_h = linear_transform_weights(input_dim, output_dim, param_list=self.params, name=name+".W_h", w_normalization=False)
 		self.b_wh = bias_weights((output_dim, ), param_list=self.params, name=name+".b_wh")
 
+		self.R_r = linear_transform_weights(output_dim, output_dim, param_list=self.params, name=name+".R_r", w_normalization=False)
+		self.b_rr = bias_weights((output_dim, ), param_list=self.params, name=name+".b_rr")
 
+		self.R_i = linear_transform_weights(output_dim, output_dim, param_list=self.params, name=name+".R_i", w_normalization=False)
+		self.b_ru = bias_weights((output_dim, ), param_list=self.params, name=name+".b_ru")
+
+		self.R_h = linear_transform_weights(output_dim, output_dim, param_list=self.params, name=name+".R_h", w_normalization=False)
+		self.b_rh = bias_weights((output_dim, ), param_list=self.params, name=name+".b_rh")
+		
+		
 		'''step through processed input to create output'''
 		def step(inp, s_prev):
 			i_t = T.nnet.sigmoid(
-				T.dot(inp, self.W_i) + T.dot(self.R_i, s_prev) + self.b_wi + self.b_ru
+				T.dot(inp, self.W_i) + T.dot(s_prev, self.R_i) + self.b_wi + self.b_ru
 				)
 			r_t = T.nnet.sigmoid(
-				T.dot(inp, self.W_r) + T.dot(self.R_r, s_prev) + self.b_wr + self.b_rr
+				T.dot(inp, self.W_r) + T.dot(s_prev, self.R_r) + self.b_wr + self.b_rr
 				)
 
 			h_hat_t = T.tanh(
-				T.dot(inp, self.W_h) + (r_t*(T.dot(self.R_h, s_prev) + self.b_rh)) + self.b_wh
+				T.dot(inp, self.W_h) + (r_t*(T.dot(s_prev, self.R_h) + self.b_rh)) + self.b_wh
 				)
 
 

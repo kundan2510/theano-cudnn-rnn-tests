@@ -6,13 +6,15 @@ import theano
 import theano.tensor as T
 import numpy
 from theano.gpuarray import dnn
+import sys
+
+from theano.tests import unittest_tools as utt
 
 EPS = 1e-6
 
 def check_equality_two_nd_array(a, b):
-	squared_difference = numpy.sum((a-b)**2)
-
-	return squared_difference < EPS
+	utt.assert_allclose(a,b, atol=1e-5, rtol=1e-5)
+	return True
 
 def test_gru(depth, input_dim, hidden_dim):
 	'''hidden_dim and output_dim are usually same'''
@@ -37,9 +39,9 @@ def test_gru(depth, input_dim, hidden_dim):
 
 	#list_of_param_values = [p.get_value() for p in params] #list of param values
 
-	#output = last_layer.output() # output tensor
+	output = last_layer.output() # output tensor
 
-	#forward_fun = theano.function([X, h0], output) #forward function
+	forward_fun = theano.function([X, h0], output) #forward function
 
 
 	#Y = T.tensor3('Y') # proxy tensor with which we want to match the output of rnn to get a loss
@@ -55,12 +57,17 @@ def test_gru(depth, input_dim, hidden_dim):
 	#get_grad = theano.function([X, h0, Y], grad) # getting list of gradients
 	rnnb = dnn.RNNBlock('float32', hidden_dim, depth, 'gru')
 	psize = rnnb.get_param_size([2, input_dim])
-	params = theano.shared(numpy.zeros((psize,), dtype='float32'))
+	params_cudnn = theano.shared(numpy.zeros((psize,), dtype='float32'))
 	# irm, irb, ium, iub, inm, inb, rrm, rrb, rum, rub, rnm, rnb
-	l0params = rnnb.split_params(params, 0, [2, input_dim])
-	print([p.shape for p in l0params])
+	l0params = rnnb.split_params(params_cudnn, 0, [2, input_dim])
+	for i,p in enumerate(l0params):
+		val = params[i].get_value()
+		p[:] = val
 
-	import sys;sys.exit(0)
+	cudnn_rnn_gru_output = rnnb.apply(params_cudnn, X, h0)
+
+
+	#import sys;sys.exit(0)
 	'''
 	loss_rnn = T.mean((Y-output_cudnn)*(Y - output_cudnn))
 	grad_cudnn = T.grad(loss, params_cudnn)
@@ -69,10 +76,19 @@ def test_gru(depth, input_dim, hidden_dim):
 
 
 
-	"""
-	cudnn_rnn_forward_fun = theano.function([X], cudnn_rnn_gru_output)
+	
+	cudnn_rnn_forward_fun = theano.function([X, h0], cudnn_rnn_gru_output)
 
-	"""
+	# h0 = numpy.random.random((1, 2, hidden_dim)).astype('float32')
+	# inp1 = numpy.random.random((5, 2, input_dim)).astype('float32')
+	# out = cudnn_rnn_forward_fun(inp1, h0)
+	# for s in out:
+	# 	print(s.shape)
+	# import sys;sys.exit(0)
+
+	
+
+	
 
 	def test0(bs, ts):
 		'''
@@ -82,19 +98,20 @@ def test_gru(depth, input_dim, hidden_dim):
 		h0 = numpy.random.random((depth, bs, hidden_dim)).astype('float32')
 		inp1 = numpy.random.random((bs, ts, input_dim)).astype('float32')
 		out1 = forward_fun(inp1, h0)
-		'''checking output shape'''
+		# '''checking output shape'''
 		assert(out1.shape == (bs, ts, hidden_dim))
-		'''
-		out1_cudnn = cudnn_rnn_forward_fun(out1)
-		assert(out1_cudnn.shape == (10, 3, hidden_dim))
-		'''
 
-		'''
-		# Checking Values
+		hy, y = cudnn_rnn_forward_fun(inp1.transpose((1,0,2)), h0)
+		print(hy.shape, y.shape)
 
-		assert(check_equality_two_nd_array(out1, out1_cudnn))
+		assert(check_equality_two_nd_array(numpy.asarray(hy)[-1], numpy.asarray(y)[0]))
+		print( out1.shape)
+		print(numpy.asarray(hy).transpose((1,0,2)).shape)
 
-		'''
+		
+
+		assert(check_equality_two_nd_array(out1.transpose((1,0,2)), numpy.asarray(hy)))
+		sys.exit(0)
 
 	def test1(bs, ts):
 		'''
@@ -120,8 +137,9 @@ def test_gru(depth, input_dim, hidden_dim):
 			check_equality_two_nd_array(g, g_hat)
 		'''
 
-	test0(10, 5)
+	test0(2, 5)
 	print("passed test0 -1")
+	import sys;sys.exit(0)
 	test0(1, 10)
 	print("passed test0 -2")
 
