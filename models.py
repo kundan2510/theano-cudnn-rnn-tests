@@ -29,7 +29,7 @@ class Model:
 		for p in self.params:
 			curr_params = numpy.prod(numpy.shape(p.get_value()))
 			total_params += curr_params
-			print "{} ({})".format(p.name, curr_params)
+			print "{} {}".format(p.name, numpy.shape(p.get_value()))
 		print ("total number of parameters: {}".format(total_params))
 		print ("Note: Effective number of parameters might be less due if you are using masking!!")
 
