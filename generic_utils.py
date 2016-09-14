@@ -1,3 +1,5 @@
+from __future__ import print_function, absolute_import
+
 import numpy as np
 import os
 import theano
@@ -25,7 +27,7 @@ def txt_to_list(txt_file, delimiter='\n'):
 def create_folder_if_not_there(folder):
 	if not os.path.exists(folder):
 		os.makedirs(folder)
-		print "Created folder {}".format(folder)
+		print("Created folder {}".format(folder))
 
 def rolling_window(a, window_size, overlap = 0):
 	# TODO: its buggy, remove the bug
@@ -52,6 +54,6 @@ def rolling_window_no_overlap(a, window_size):
 
 
 def print_args(args):
-	print "\nFollowing args will be used: \n"
+	print("\nFollowing args will be used: \n")
 	for k in args.__dict__.keys():
-		print "{0:{fill}{align}30}: {1}".format(k, args.__dict__[k], fill=" ", align="<")
+		print("{0:{fill}{align}30}: {1}".format(k, args.__dict__[k], fill=" ", align="<"))

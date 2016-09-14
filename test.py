@@ -1,3 +1,5 @@
+from __future__ import absolute_import, print_function
+
 from layers import GRU, WrapperLayer
 from models import Model
 import theano
@@ -29,7 +31,7 @@ def test_gru(depth, input_dim, hidden_dim):
 		last_dim = hidden_dim
 
 	params = model.get_params()
-	print "Printing order of params. Important to know as this will help set params for cudnn_rnn"
+	print("Printing order of params. Important to know as this will help set params for cudnn_rnn")
 
 	model.print_params()
 
@@ -51,14 +53,14 @@ def test_gru(depth, input_dim, hidden_dim):
 	#grad = T.grad(loss, params) # list of gradient with respect to parameters
 
 	#get_grad = theano.function([X, h0, Y], grad) # getting list of gradients
-        rnnb = dnn.RNNBlock('float32', hidden_dim, depth, 'gru')
-        psize = rnnb.get_param_size([2, input_dim])
-        params = theano.shared(numpy.zeros((psize,), dtype='float32'))
-        # irm, irb, ium, iub, inm, inb, rrm, rrb, rum, rub, rnm, rnb
-        l0params = rnnb.split_params(params, 0, [2, input_dim])
-        print [p.shape for p in l0params]
+	rnnb = dnn.RNNBlock('float32', hidden_dim, depth, 'gru')
+	psize = rnnb.get_param_size([2, input_dim])
+	params = theano.shared(numpy.zeros((psize,), dtype='float32'))
+	# irm, irb, ium, iub, inm, inb, rrm, rrb, rum, rub, rnm, rnb
+	l0params = rnnb.split_params(params, 0, [2, input_dim])
+	print([p.shape for p in l0params])
 
-        import sys;sys.exit(0)
+	import sys;sys.exit(0)
 	'''
 	loss_rnn = T.mean((Y-output_cudnn)*(Y - output_cudnn))
 	grad_cudnn = T.grad(loss, params_cudnn)
@@ -119,31 +121,31 @@ def test_gru(depth, input_dim, hidden_dim):
 		'''
 
 	test0(10, 5)
-	print "passed test0 -1"
+	print("passed test0 -1")
 	test0(1, 10)
-	print "passed test0 -2"
+	print("passed test0 -2")
 
 	test1(5, 3)
-	print "passed test1 -1"
+	print("passed test1 -1")
 
 	test1(6, 10)
-	print "passed test1 -2"
+	print("passed test1 -2")
 
 
-print "Running Case - 1"
+print("Running Case - 1")
 test_gru(1, 2, 3)
 
-print "Running Case - 2"
+print("Running Case - 2")
 test_gru(3, 5, 6)
 
-print "Running Case - 3"
+print("Running Case - 3")
 test_gru(3, 1, 1)
 
 
-print "Running Case - 4"
+print("Running Case - 4")
 test_gru(3, 1, 20)
 
-print "Running Case - 5"
+print("Running Case - 5")
 test_gru(3, 20, 1)
 
 

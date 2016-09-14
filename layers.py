@@ -1,8 +1,10 @@
+from __future__ import absolute_import, print_function
+
 import theano
 import theano.tensor as T
 import numpy
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
-from theano.sandbox.cuda.dnn import dnn_conv
+from theano.gpuarray.dnn import dnn_conv
 
 from generic_utils import *
 
@@ -105,7 +107,7 @@ class GRU(Layer):
 			h_hat_t = T.tanh(
 				T.dot(inp, self.W_h) + (r_t*(T.dot(self.R_h, s_prev) + self.b_rh)) + self.b_wh
 				)
-			
+
 
 			s_curr = ((floatX(1) - i_t) * h_hat_t) + (i_t * s_prev)
 
